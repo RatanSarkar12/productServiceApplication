@@ -20,11 +20,13 @@ public class SelfProductService {
           return productRepository.findAll();
     }
     public Optional<Product> getSingleProduct(Long productId)throws NotFoundException{
+
          Product product = productRepository.findProductById(productId);
 //         if(product == null){
-//             return Optional<String>("product doesno exist");// new NotFoundException("PRODUCT doesnot exist");
+//             return "product doesno exist";
+//             // new NotFoundException("PRODUCT doesnot exist");
 //         }
-        return Optional.of(product);
+      return Optional.of(product);
     }
     public Product addNewProduct(ProductDto productDto){
          return null;

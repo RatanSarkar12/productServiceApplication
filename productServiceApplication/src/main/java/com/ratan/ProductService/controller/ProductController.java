@@ -1,7 +1,11 @@
 package com.ratan.ProductService.controller;
 
+import com.ratan.ProductService.Client.authenticationClient.AuthenticationClient;
+import com.ratan.ProductService.Client.authenticationClient.dtos.SessionStatus;
+import com.ratan.ProductService.Client.authenticationClient.dtos.ValidateTokenResponseDto;
 import com.ratan.ProductService.Dtos.ProductDto;
 import com.ratan.ProductService.exceptions.NotFoundException;
+import com.ratan.ProductService.Client.fakestoreapi.FakeStoreProductDto;
 import com.ratan.ProductService.models.Catagory;
 import com.ratan.ProductService.models.Product;
 import com.ratan.ProductService.repository.ProductRepository;
@@ -13,6 +17,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.relation.Role;
 import java.rmi.NotBoundException;
 import java.util.List;
 import java.util.Optional;
@@ -20,41 +25,66 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/products")
 public class ProductController {
-
+    private AuthenticationClient authenticationClient;
     //private IProductService productService;
     private ProductRepository productRepository;
+
     private ProductService productService;
-    public ProductController(ProductService productService, ProductRepository productRepository){
+
+    public ProductController(ProductService productService, AuthenticationClient authenticationClient, ProductRepository productRepository){
         this.productRepository=productRepository;
         this.productService = productService;
-
+        this.authenticationClient=authenticationClient;
     }
-    @GetMapping()
-    public ResponseEntity<List<Product>> getAllProducts(@Nullable @RequestHeader("USER_ID") Long userid){
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Product>> getAllProducts(@Nullable @RequestHeader("AUTH-TOKEN") String token,
+                                                        @Nullable @RequestHeader("USER-ID") Long userId) {
 
-           // List<Product>products = productService.getAllProducts(userid);
+        //check if token exist
+//        if(token==null || userId==null){
+//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        }
+//        Boolean response = authenticationClient.validate(token,userId);
+//        //check if tokrn is valid
+//        if(response == false){
+//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        }
+        //validate token
+//        RestTemplate rt = new RestTemplate();
+//        rt.get("localhost:9090/auth/Validate?")
 
-            //return  new ResponseEntity<>(products, HttpStatus.OK);
-        return null;
+
+        //check user has permission or not
+//        Boolean isUserAdmin=false;
+//        for(Role role:response.getUserDto().getRoles()){
+//            if(role.getRoleName().equals("ADMIN")){
+//                isUserAdmin=true;
+//            }
+//        }
+//        if(!isUserAdmin){
+//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        }
+        List<Product>products = (List<Product>) productService.getAllProducts();
+        return new ResponseEntity<>(products,HttpStatus.OK);
     }
 
-    @GetMapping("/productId")
-    public ResponseEntity<Product> getSingleProduct(Long productId) throws NotFoundException, NotBoundException {
+    @GetMapping("/{productId}")
+    public ResponseEntity<Product> getSingleProduct(@PathVariable ("productId") Long productId) throws NotFoundException, NotBoundException {
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
 
-        headers.add(
-                "auth_token", "noaccess4uBro"
-        );
+//        headers.add(
+//                "auth_token", "noaccess"
+//        );
 
         Optional<Product> productOptional = productService.getSingleProduct(productId);
 
         if (productOptional.isEmpty()) {
             throw new NotFoundException("no product with product id " + productId);
         }
-        ResponseEntity<Product>response = new ResponseEntity(productService.getSingleProduct(productId), headers, HttpStatus.NOT_FOUND);
+        ResponseEntity<Product>response = new ResponseEntity(productService.getSingleProduct(productId), HttpStatus.NOT_FOUND);
         return response;
     }
-    @PostMapping("/products")
+    @PostMapping("/product")
     public ResponseEntity<Product> addNewProduct(@RequestBody ProductDto products){
         Product newProduct = new Product();
         newProduct.setDescription(products.getDescription());
@@ -83,8 +113,6 @@ public class ProductController {
     public String deleteProduct(@PathVariable("productId") Long productId){
         return "deletingn a product "+productId ;
     }
-
-//
 //     @GetMapping("/productWithId")
 //     public Product laapProductsWithId(Long id){
 //

@@ -1,5 +1,6 @@
-package com.ratan.ProductService.Dtos;
+package com.ratan.ProductService.Client.fakestoreapi;
 
+import com.ratan.ProductService.Dtos.RatingDto;
 import lombok.Getter;
 import lombok.Setter;
 
